@@ -1,58 +1,135 @@
-<!doctype html><html lang="de"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no"><title>Ulm Street V2</title>
+<!doctype html>
+<html lang="de">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no,viewport-fit=cover">
+<title>ULM STREET V3</title>
 <style>
-*{box-sizing:border-box}html,body{margin:0;height:100%;overflow:hidden;background:#111;color:#fff;font-family:-apple-system,BlinkMacSystemFont,system-ui,sans-serif;touch-action:none}
-canvas{width:100vw;height:100vh;display:block}.hud{position:fixed;top:10px;left:10px;right:10px;display:flex;justify-content:space-between;gap:8px;pointer-events:none}.pill{background:#111c;border:1px solid #fff3;border-radius:12px;padding:8px 11px;font-weight:800;text-shadow:0 2px 4px #000}.mission{position:fixed;top:58px;left:50%;transform:translateX(-50%);background:#111d;border-radius:12px;padding:8px 13px;text-align:center;font-size:13px;max-width:90%}
-.controls{position:fixed;left:0;right:0;bottom:12px;display:flex;justify-content:space-between;padding:0 18px;pointer-events:none}.pad{width:154px;height:154px;position:relative;pointer-events:auto}.b{position:absolute;width:52px;height:52px;border-radius:50%;background:#fff2;border:1px solid #fff5;display:flex;align-items:center;justify-content:center;font-size:20px;font-weight:900;user-select:none}.u{left:51px}.d{left:51px;bottom:0}.l{left:0;top:51px}.r{right:0;top:51px}.action{pointer-events:auto;align-self:flex-end}.act{position:relative!important;right:auto!important;bottom:auto!important;width:72px;height:72px;background:#d52f2fcc}
-#panel{display:none;position:fixed;left:50%;top:50%;transform:translate(-50%,-50%);width:min(340px,88vw);background:#15171bdd;border:1px solid #fff3;border-radius:20px;padding:20px;text-align:center;box-shadow:0 20px 60px #000b}#panel button{border:0;border-radius:12px;padding:11px 16px;font-weight:800}
-</style></head><body>
-<canvas id="c"></canvas><div class="hud"><div class="pill">💶 <span id="money">500</span> €</div><div class="pill">⭐ <span id="wanted">0</span></div><div class="pill">📍 <span id="place">Innenstadt</span></div></div>
-<div class="mission" id="mission">📦 Auftrag: Hole das Paket am Bahnhof ab</div>
-<div class="controls"><div class="pad"><div class="b u" data-k="up">▲</div><div class="b d" data-k="down">▼</div><div class="b l" data-k="left">◀</div><div class="b r" data-k="right">▶</div></div><div class="action"><div class="b act" id="act">🚗</div></div></div>
-<div id="panel"><h2 id="pt">Mission geschafft! 🎉</h2><p id="pd">+250 €</p><button onclick="hidePanel()">Weiter</button></div>
+*{box-sizing:border-box}html,body{margin:0;height:100%;overflow:hidden;background:#0b0d10;color:#fff;font-family:-apple-system,BlinkMacSystemFont,system-ui,sans-serif;touch-action:none}
+canvas{display:block;width:100vw;height:100vh}
+#top{position:fixed;top:10px;left:10px;right:10px;display:flex;gap:7px;align-items:center;pointer-events:none}
+.card{background:rgba(8,10,14,.82);border:1px solid rgba(255,255,255,.12);backdrop-filter:blur(8px);border-radius:12px;padding:7px 10px;font-weight:800;font-size:13px;box-shadow:0 4px 20px #0005}
+#mission{position:fixed;top:58px;left:50%;transform:translateX(-50%);width:max-content;max-width:92vw;text-align:center;background:#0a0c10e8;border:1px solid #ffffff18;border-radius:13px;padding:8px 12px;font-size:13px;box-shadow:0 6px 24px #0007}
+#mini{position:fixed;right:10px;top:104px;width:118px;height:82px;border-radius:10px;border:1px solid #fff3;background:#111;overflow:hidden;box-shadow:0 5px 18px #0008}
+#controls{position:fixed;left:0;right:0;bottom:max(12px,env(safe-area-inset-bottom));display:flex;justify-content:space-between;padding:0 17px;pointer-events:none}
+.pad{width:154px;height:154px;position:relative;pointer-events:auto}.btn{position:absolute;width:52px;height:52px;border-radius:50%;background:#ffffff18;border:1px solid #fff3;display:flex;align-items:center;justify-content:center;font-size:19px;font-weight:900;color:#fff;box-shadow:0 5px 15px #0006;user-select:none}
+.u{left:51px}.d{left:51px;bottom:0}.l{left:0;top:51px}.r{right:0;top:51px}
+.actions{width:150px;position:relative;pointer-events:auto}.act{right:0;bottom:42px!important;width:70px;height:70px;background:#d73636d9}.hand{right:70px;bottom:5px!important;width:50px;height:50px;background:#ffffff20}
+#toast{position:fixed;left:50%;bottom:178px;transform:translateX(-50%);background:#0b0d10e8;border:1px solid #fff2;border-radius:12px;padding:9px 13px;display:none;font-weight:800;white-space:nowrap}
+#panel{display:none;position:fixed;left:50%;top:50%;transform:translate(-50%,-50%);width:min(350px,88vw);background:#101318f2;border:1px solid #fff2;border-radius:20px;padding:20px;text-align:center;box-shadow:0 25px 80px #000b}
+#panel h2{margin:0 0 8px}.btn2{border:0;background:#fff;color:#111;border-radius:11px;padding:10px 17px;font-weight:900}
+</style>
+</head>
+<body>
+<canvas id="game"></canvas>
+<div id="top"><div class="card">💶 <span id="money">500</span> €</div><div class="card">⭐ <span id="wanted">0</span></div><div class="card">❤️ <span id="hp">100</span></div></div>
+<div id="mission">📦 <b>BAHNHOF</b> · Hol das Paket ab</div><canvas id="mini" width="236" height="164"></canvas>
+<div id="toast"></div>
+<div id="controls">
+  <div class="pad"><div class="btn u" data-k="up">▲</div><div class="btn d" data-k="down">▼</div><div class="btn l" data-k="left">◀</div><div class="btn r" data-k="right">▶</div></div>
+  <div class="actions"><div class="btn hand" id="hand">✋</div><div class="btn act" id="act">🚗</div></div>
+</div>
+<div id="panel"><h2 id="pt">Mission geschafft</h2><p id="pd"></p><button class="btn2" onclick="closePanel()">Weiter</button></div>
 <script>
-const c=document.getElementById('c'),g=c.getContext('2d');let W,H,dpr;
-function resize(){dpr=devicePixelRatio||1;W=innerWidth;H=innerHeight;c.width=W*dpr;c.height=H*dpr;g.setTransform(dpr,0,0,dpr,0,0)}resize();addEventListener('resize',resize);
-const key={up:0,down:0,left:0,right:0};document.querySelectorAll('[data-k]').forEach(e=>{e.onpointerdown=ev=>{ev.preventDefault();key[e.dataset.k]=1};e.onpointerup=e.onpointercancel=e.onpointerleave=()=>key[e.dataset.k]=0});
-addEventListener('keydown',e=>{const m={ArrowUp:'up',w:'up',ArrowDown:'down',s:'down',ArrowLeft:'left',a:'left',ArrowRight:'right',d:'right'};if(m[e.key])key[m[e.key]]=1});addEventListener('keyup',e=>{const m={ArrowUp:'up',w:'up',ArrowDown:'down',s:'down',ArrowLeft:'left',a:'left',ArrowRight:'right',d:'right'};if(m[e.key])key[m[e.key]]=0});
-const world={w:3000,h:2200}, p={x:820,y:1040,a:0,v:0,car:true};let money=500,wanted=0,mission=0,missionDone=false;
-const spots=[
-{x:1500,y:1030,n:'ULMER MÜNSTER',r:100,t:'landmark'},
-{x:600,y:1030,n:'BAHNHOF',r:75,t:'station'},
-{x:2370,y:1030,n:'DONAU',r:95,t:'river'},
-{x:1980,y:520,n:'TANKSTELLE',r:60,t:'shop'},
-{x:430,y:1640,n:'SHOP',r:55,t:'shop'}];
-const buildings=[
-[70,90,500,260],[700,90,440,260],[1370,90,500,260],[2000,90,470,260],
-[70,520,500,260],[700,520,440,260],[1370,520,500,260],[2000,520,470,260],
-[70,1410,500,300],[700,1410,440,300],[1370,1410,500,300],[2000,1410,470,300]];
-const npcs=[];for(let i=0;i<24;i++)npcs.push({x:120+Math.random()*2550,y:380+Math.random()*1300,vx:(Math.random()-.5)*.7,vy:(Math.random()-.5)*.7});
-const cars=[];for(let i=0;i<16;i++)cars.push({x:Math.random()*2800,y:[400,700,1050,1350][i%4]+(Math.random()*50-25),a:Math.random()<.5?0:Math.PI/2});
-function dist(a,b){return Math.hypot(a.x-b.x,a.y-b.y)}
-function panel(t,d){document.getElementById('pt').textContent=t;document.getElementById('pd').textContent=d;document.getElementById('panel').style.display='block'}function hidePanel(){document.getElementById('panel').style.display='none'}
-document.getElementById('act').onpointerdown=()=>{p.car=!p.car;document.getElementById('act').textContent=p.car?'🚗':'🚶'};
+const C=document.getElementById('game'),ctx=C.getContext('2d'),M=document.getElementById('mini'),mx=M.getContext('2d');let W,H,D;
+function resize(){D=devicePixelRatio||1;W=innerWidth;H=innerHeight;C.width=W*D;C.height=H*D;ctx.setTransform(D,0,0,D,0,0)}resize();addEventListener('resize',resize);
+const keys={up:0,down:0,left:0,right:0};document.querySelectorAll('[data-k]').forEach(b=>{b.onpointerdown=e=>{e.preventDefault();keys[b.dataset.k]=1};b.onpointerup=b.onpointercancel=b.onpointerleave=()=>keys[b.dataset.k]=0});
+addEventListener('keydown',e=>{const m={ArrowUp:'up',w:'up',ArrowDown:'down',s:'down',ArrowLeft:'left',a:'left',ArrowRight:'right',d:'right'};if(m[e.key])keys[m[e.key]]=1});
+addEventListener('keyup',e=>{const m={ArrowUp:'up',w:'up',ArrowDown:'down',s:'down',ArrowLeft:'left',a:'left',ArrowRight:'right',d:'right'};if(m[e.key])keys[m[e.key]]=0});
+
+const world={w:3600,h:2600},p={x:830,y:1110,a:0,v:0,car:true,hp:100};
+let money=500,wanted=0,step=0,shake=0,flash=0;
+const POI={
+station:{x:650,y:1090,name:'BAHNHOF'},
+munster:{x:1780,y:1090,name:'ULMER MÜNSTER'},
+donau:{x:2820,y:1090,name:'DONAU'},
+tank:{x:2350,y:560,name:'TANKSTELLE'},
+shop:{x:520,y:1880,name:'47 SHOP'}
+};
+const roadsY=[430,760,1090,1420,1770,2110],roadsX=[650,1250,1850,2450,3050];
+const blocks=[];
+for(let ix=0;ix<roadsX.length-1;ix++)for(let iy=0;iy<roadsY.length-1;iy++){
+  const x=roadsX[ix]+65,y=roadsY[iy]+65,w=roadsX[ix+1]-roadsX[ix]-130,h=roadsY[iy+1]-roadsY[iy]-130;
+  blocks.push({x,y,w,h,style:(ix+iy)%4});
+}
+const npcs=[],traffic=[],particles=[];
+for(let i=0;i<45;i++)npcs.push({x:100+Math.random()*3400,y:380+Math.random()*1850,phase:Math.random()*7});
+for(let i=0;i<22;i++)traffic.push({x:Math.random()*3500,y:roadsY[i%roadsY.length]+(Math.random()>.5?20:-20),dir:Math.random()>.5?1:-1,type:i%3});
+
+function toast(s){const t=document.getElementById('toast');t.textContent=s;t.style.display='block';clearTimeout(window.tt);window.tt=setTimeout(()=>t.style.display='none',1600)}
+function panel(t,d){document.getElementById('pt').textContent=t;document.getElementById('pd').textContent=d;document.getElementById('panel').style.display='block'}
+function closePanel(){document.getElementById('panel').style.display='none'}
+function d(a,b){return Math.hypot(a.x-b.x,a.y-b.y)}
+document.getElementById('act').onpointerdown=()=>{p.car=!p.car;p.v=0;document.getElementById('act').textContent=p.car?'🚗':'🚶';toast(p.car?'Eingestiegen':'Ausgestiegen')};
+document.getElementById('hand').onpointerdown=()=>{if(!p.car){if(d(p,POI.shop)<100){money+=50;document.getElementById('money').textContent=money;toast('☕ Kleiner Bonus +50 €')}else toast('Nichts zu interagieren')}}; 
+
 function update(){
- if(p.car){p.a+=(key.right-key.left)*.06;p.v+=(key.up-key.down)*.24;p.v*=.94;p.v=Math.max(-3.5,Math.min(7,p.v));p.x+=Math.cos(p.a)*p.v;p.y+=Math.sin(p.a)*p.v}else{p.x+=(key.right-key.left)*3;p.y+=(key.down-key.up)*3}
- p.x=Math.max(30,Math.min(world.w-30,p.x));p.y=Math.max(30,Math.min(world.h-30,p.y));
- npcs.forEach(n=>{n.x+=n.vx;n.y+=n.vy;if(n.x<30||n.x>2970)n.vx*=-1;if(n.y<350||n.y>1900)n.vy*=-1});
- if(mission===0&&dist(p,spots[1])<115){mission=1;document.getElementById('mission').textContent='📦 Paket abgeholt – bring es zum Münster'}
- if(mission===1&&dist(p,spots[0])<145){mission=2;money+=250;document.getElementById('money').textContent=money;document.getElementById('mission').textContent='💰 Auftrag erledigt – neuer Auftrag kommt';panel('Mission geschafft! 🎉','+250 € — Neuer Auftrag: Tanke das Auto.')}
- if(mission===2&&dist(p,spots[3])<100){mission=3;money+=150;document.getElementById('money').textContent=money;document.getElementById('mission').textContent='⛽ Getankt – fahr zur Donau';panel('Getankt! ⛽','+150 €')}
- if(mission===3&&dist(p,spots[2])<140){mission=4;money+=300;wanted=Math.min(5,wanted+1);document.getElementById('money').textContent=money;document.getElementById('wanted').textContent=wanted;document.getElementById('mission').textContent='⭐ Auftrag erledigt – freie Fahrt';panel('Auftrag abgeschlossen!','+300 €')}
+ if(p.car){p.a+=(keys.right-keys.left)*.058;p.v+=(keys.up-keys.down)*.25;p.v*=.94;p.v=Math.max(-3.6,Math.min(7.5,p.v));p.x+=Math.cos(p.a)*p.v;p.y+=Math.sin(p.a)*p.v}
+ else {p.x+=(keys.right-keys.left)*3.1;p.y+=(keys.down-keys.up)*3.1}
+ p.x=Math.max(35,Math.min(world.w-35,p.x));p.y=Math.max(35,Math.min(world.h-35,p.y));
+ traffic.forEach(t=>{t.x+=t.dir*(1.1+t.type*.3);if(t.x<-50)t.x=3650;if(t.x>3650)t.x=-50});
+ npcs.forEach((n,i)=>{n.x+=Math.cos(n.phase+performance.now()/3000)*.25;n.y+=Math.sin(n.phase+performance.now()/3200)*.22});
+ if(step===0&&d(p,POI.station)<135){step=1;document.getElementById('mission').innerHTML='📦 <b>PAKET ABGEHOLT</b> · Bring es zum Münster';toast('Paket im Kofferraum') }
+ if(step===1&&d(p,POI.munster)<155){step=2;money+=300;document.getElementById('money').textContent=money;document.getElementById('mission').innerHTML='⛽ <b>TANKSTELLE</b> · Mach den Wagen voll';panel('Lieferung erledigt!','+300 € · Neuer Auftrag: Tankstelle')}
+ if(step===2&&d(p,POI.tank)<120){step=3;money+=150;document.getElementById('money').textContent=money;document.getElementById('mission').innerHTML='🌊 <b>DONAU</b> · Triff deinen Kontakt';panel('Getankt!','+150 €')}
+ if(step===3&&d(p,POI.donau)<170){step=4;money+=500;wanted=1;document.getElementById('money').textContent=money;document.getElementById('wanted').textContent=wanted;document.getElementById('mission').innerHTML='⭐ <b>FREIE FAHRT</b> · Erkunde Ulm';panel('Kontakt getroffen','+500 € · Fahndung: 1 Stern')}
+ if(wanted>0&&Math.random()<.001){wanted=Math.max(0,wanted-1);document.getElementById('wanted').textContent=wanted}
+}
+
+function roundedRect(c,x,y,w,h,r){c.beginPath();c.roundRect(x,y,w,h,r);c.fill()}
+function building(b){
+ const colors=[['#5b4a43','#80695c'],['#46565a','#657b7d'],['#514b59','#776d83'],['#625243','#8c715b']];
+ const cc=colors[b.style];
+ ctx.fillStyle='#1d2223';roundedRect(ctx,b.x+7,b.y+10,b.w,b.h,12);
+ ctx.fillStyle=cc[0];roundedRect(ctx,b.x,b.y,b.w,b.h,10);
+ ctx.fillStyle=cc[1];
+ for(let x=b.x+18;x<b.x+b.w-18;x+=42)for(let y=b.y+18;y<b.y+b.h-18;y+=38){ctx.fillRect(x,y,18,13);ctx.fillRect(x+2,y+18,14,7)}
+ ctx.fillStyle='#2a2522';ctx.fillRect(b.x+b.w/2-24,b.y+b.h-52,48,52);
+}
+function carSprite(x,y,a,color,scale=1){
+ ctx.save();ctx.translate(x,y);ctx.rotate(a);ctx.scale(scale,scale);
+ ctx.fillStyle='#151719';roundedRect(ctx,-23,-13,46,26,7);
+ ctx.fillStyle=color;roundedRect(ctx,-21,-11,42,22,6);
+ ctx.fillStyle='#b9d7df';roundedRect(ctx,-7,-9,18,18,4);
+ ctx.fillStyle='#fff';ctx.fillRect(16,-8,3,5);ctx.fillRect(16,3,3,5);
+ ctx.fillStyle='#222';ctx.fillRect(-16,-15,9,3);ctx.fillRect(8,-15,9,3);
+ ctx.restore();
+}
+function poi(x,y,name,type){
+ ctx.save();ctx.translate(x,y);
+ ctx.shadowColor='#0008';ctx.shadowBlur=14;
+ ctx.fillStyle=type==='munster'?'#cbb88b':type==='water'?'#3f8da4':'#d56b45';ctx.beginPath();ctx.arc(0,0,type==='munster'?65:48,0,7);ctx.fill();ctx.shadowBlur=0;
+ ctx.fillStyle='#fff';ctx.font='900 15px system-ui';ctx.textAlign='center';ctx.fillText(name,0,(type==='munster'?90:70));ctx.restore();
 }
 function draw(){
- g.clearRect(0,0,W,H);let cx=Math.max(0,Math.min(world.w-W,p.x-W/2)),cy=Math.max(0,Math.min(world.h-H,p.y-H/2));g.save();g.translate(-cx,-cy);
- g.fillStyle='#39413d';g.fillRect(0,0,world.w,world.h);
- g.fillStyle='#252a2b';[400,700,1050,1350].forEach(y=>g.fillRect(0,y-55,world.w,110));[620,1260,1900].forEach(x=>g.fillRect(x-55,0,110,world.h));
- g.strokeStyle='#d2c35d';g.lineWidth=3;g.setLineDash([28,24]);[400,700,1050,1350].forEach(y=>{g.beginPath();g.moveTo(0,y);g.lineTo(world.w,y);g.stroke()});[620,1260,1900].forEach(x=>{g.beginPath();g.moveTo(x,0);g.lineTo(x,world.h);g.stroke()});g.setLineDash([]);
- buildings.forEach(b=>{g.fillStyle='#77665b';g.fillRect(...b);g.fillStyle='#a38a76';for(let xx=b[0]+18;xx<b[0]+b[2]-15;xx+=48)for(let yy=b[1]+18;yy<b[1]+b[3]-15;yy+=48)g.fillRect(xx,yy,22,24)});
- // Donau
- g.fillStyle='#36758b';g.fillRect(0,930,world.w,190);g.fillStyle='#4e93a5';for(let i=0;i<30;i++)g.fillRect(i*105,1010+(i%3)*12,55,3);
- spots.forEach((s,i)=>{if(i===2)return;g.fillStyle=i===0?'#bba36d':i===1?'#69737a':'#b66f43';g.beginPath();g.arc(s.x,s.y,s.r,0,Math.PI*2);g.fill();g.fillStyle='#fff';g.font='bold 17px system-ui';g.textAlign='center';g.fillText(s.n,s.x,s.y+s.r+22)});
- // Münster tower
- g.fillStyle='#d8c79a';g.fillRect(1460,840,80,170);g.beginPath();g.moveTo(1460,840);g.lineTo(1500,740);g.lineTo(1540,840);g.fill();
- npcs.forEach(n=>{g.fillStyle='#e8b08c';g.beginPath();g.arc(n.x,n.y,7,0,7);g.fill();g.fillStyle='#4b78b8';g.fillRect(n.x-5,n.y+7,10,13)});
- cars.forEach(q=>{g.save();g.translate(q.x,q.y);g.rotate(q.a);g.fillStyle='#b93b3b';g.fillRect(-18,-9,36,18);g.fillStyle='#a9cddd';g.fillRect(-4,-7,12,14);g.restore()});
- g.save();g.translate(p.x,p.y);g.rotate(p.a);g.fillStyle=p.car?'#e53935':'#3aa5ff';g.fillRect(-20,-11,40,22);if(p.car){g.fillStyle='#a8d5e6';g.fillRect(0,-8,12,16)}g.restore();g.restore();
- let near=spots.reduce((a,s)=>dist(p,s)<dist(p,a)?s:a,spots[0]);document.getElementById('place').textContent=dist(p,near)<170?near.n:'Ulm';}
+ ctx.clearRect(0,0,W,H);
+ const cx=Math.max(0,Math.min(world.w-W,p.x-W/2)),cy=Math.max(0,Math.min(world.h-H,p.y-H/2));
+ ctx.save();ctx.translate(-cx,-cy);
+ ctx.fillStyle='#303633';ctx.fillRect(0,0,world.w,world.h);
+ // water
+ ctx.fillStyle='#316f83';ctx.fillRect(0,970,world.w,240);
+ for(let i=0;i<40;i++){ctx.strokeStyle='#5c9bab55';ctx.lineWidth=3;ctx.beginPath();ctx.moveTo(i*100,1010+(i%5)*22);ctx.lineTo(i*100+55,1010+(i%5)*22);ctx.stroke()}
+ // roads
+ ctx.fillStyle='#22282a';roadsY.forEach(y=>ctx.fillRect(0,y-58,world.w,116));roadsX.forEach(x=>ctx.fillRect(x-58,0,116,world.h));
+ ctx.strokeStyle='#d7c75e';ctx.lineWidth=3;ctx.setLineDash([30,24]);roadsY.forEach(y=>{ctx.beginPath();ctx.moveTo(0,y);ctx.lineTo(world.w,y);ctx.stroke()});roadsX.forEach(x=>{ctx.beginPath();ctx.moveTo(x,0);ctx.lineTo(x,world.h);ctx.stroke()});ctx.setLineDash([]);
+ blocks.forEach(building);
+ // crossings
+ ctx.fillStyle='#eee';roadsY.forEach(y=>{[650,1250,1850,2450,3050].forEach(x=>{for(let i=-35;i<40;i+=12)ctx.fillRect(x+i,y-52,7,104)})});
+ traffic.forEach((t,i)=>carSprite(t.x,t.y,t.dir>0?0:Math.PI,i%4===0?'#d94a42':i%4===1?'#e1a62b':'#4d82b6',.72));
+ npcs.forEach(n=>{ctx.fillStyle='#d99a79';ctx.beginPath();ctx.arc(n.x,n.y,6,0,7);ctx.fill();ctx.fillStyle='#3b76a8';ctx.fillRect(n.x-5,n.y+6,10,12)});
+ poi(POI.station.x,POI.station.y,'BAHNHOF','station');poi(POI.munster.x,POI.munster.y,'ULMER MÜNSTER','munster');poi(POI.donau.x,POI.donau.y,'DONAU','water');poi(POI.tank.x,POI.tank.y,'TANKSTELLE','station');poi(POI.shop.x,POI.shop.y,'47 SHOP','shop');
+ // Münster tower detail
+ ctx.fillStyle='#d9c695';ctx.fillRect(1744,920,72,170);ctx.beginPath();ctx.moveTo(1744,920);ctx.lineTo(1780,830);ctx.lineTo(1816,920);ctx.fill();ctx.fillStyle='#7d725c';ctx.fillRect(1760,950,40,40);
+ carSprite(p.x,p.y,p.a,p.car?'#e23d3d':'#3ba7e8',p.car?1:0.62);
+ ctx.restore();
+ drawMini();
+}
+function drawMini(){
+ mx.clearRect(0,0,236,164);mx.fillStyle='#171b1c';mx.fillRect(0,0,236,164);
+ mx.fillStyle='#263032';roadsY.forEach(y=>mx.fillRect(0,y/world.h*164-4,236,8));roadsX.forEach(x=>mx.fillRect(x/world.w*236-4,0,8,164));
+ mx.fillStyle='#3b7e8e';mx.fillRect(0,970/world.h*164,236,240/world.h*164);
+ mx.fillStyle='#fff';mx.beginPath();mx.arc(POI.munster.x/world.w*236,POI.munster.y/world.h*164,4,0,7);mx.fill();
+ mx.fillStyle='#e33';mx.beginPath();mx.arc(p.x/world.w*236,p.y/world.h*164,4,0,7);mx.fill();
+}
 function loop(){update();draw();requestAnimationFrame(loop)}loop();
 </script></body></html>
