@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no,viewport-fit=cover">
-<title>ULM STREET — V9</title>
+<title>ULM STREET — V11</title>
 <style>
 html,body{margin:0;height:100%;overflow:hidden;background:#111;color:#fff;font-family:-apple-system,BlinkMacSystemFont,system-ui,sans-serif;touch-action:none}
 canvas{width:100vw;height:100vh;display:block}
@@ -36,12 +36,77 @@ function cube(x,y,z,w,h,d,r,gg,b){
 }
 function car(x,z,r,gg,b){cube(x,2,z,30,12,55,r,gg,b);cube(x,14,z-4,22,8,23,.12,.18,.2);cube(x,7,z-29,4,5,3,.9,.85,.65);cube(x,7,z+29,4,5,3,.8,.08,.06)}
 function npc(x,z,shirt){cube(x,0,z,10,23,10,.74,.48,.34);cube(x,23,z,11,11,11,.72,.46,.32);cube(x,5,z,14,4,12,shirt[0],shirt[1],shirt[2])}
-cube(0,-.1,0,4200,.1,3200,.16,.18,.18);cube(0,.01,0,4200,.03,230,.09,.10,.11);cube(0,.02,0,230,.03,3200,.09,.10,.11);
-for(let x=-1500;x<=1500;x+=300)for(let z=-1000;z<=1000;z+=300){if(Math.abs(x)<170||Math.abs(z)<170)continue;let h=38+((Math.abs(x*9+z*7)%45));cube(x,0,z,185,h,185,.25,.23,.22)}
-// Münster
-cube(0,0,-690,135,130,105,.62,.57,.45);cube(0,0,-745,48,320,48,.68,.63,.52);cube(0,320,-745,58,75,58,.73,.68,.56);cube(0,395,-745,10,32,10,.24,.22,.18);
+// ULM STREET — upgraded city dressing: streets, sidewalks, blocks, water and landmarks
+cube(0,-.1,0,4200,.1,3200,.16,.18,.18);
+
+// asphalt grid
+const roadXs=[-1200,-600,0,600,1200];
+const roadZs=[-900,-300,300,900];
+for(const rx of roadXs) cube(rx,.01,0,118,0.035,3000,.055,.065,.075);
+for(const rz of roadZs) cube(0,.015,rz,3900,0.035,118,.055,.065,.075);
+
+// sidewalks beside every main road
+for(const rx of roadXs){cube(rx-82,.02,0,38,.045,3000,.36,.37,.34);cube(rx+82,.02,0,38,.045,3000,.36,.37,.34);}
+for(const rz of roadZs){cube(0,.025,rz-82,3900,.045,38,.36,.37,.34);cube(0,.025,rz+82,3900,.045,38,.36,.37,.34);}
+
+// lane markings
+for(const rx of roadXs){for(let zz=-1450;zz<1450;zz+=72)cube(rx,.055,zz,3,.02,34,.78,.70,.28);}
+for(const rz of roadZs){for(let xx=-1850;xx<1850;xx+=72)cube(xx,.06,rz,34,.02,3,.78,.70,.28);}
+
+// city blocks with varied architecture
+const palette=[[.28,.27,.26],[.36,.31,.28],[.22,.28,.31],[.39,.34,.29],[.25,.25,.29]];
+for(let bx=-1500;bx<=1500;bx+=300)for(let bz=-1200;bz<=1200;bz+=300){
+  if(Math.abs(bx)<180 || Math.abs(bz)<180) continue;
+  const idx=Math.abs((bx/300)*7+(bz/300)*11)%palette.length, col=palette[idx];
+  const h=42+Math.abs((bx*13+bz*7)%48);
+  cube(bx,0,bz,188,h,188,col[0],col[1],col[2]);
+  // roof slab
+  cube(bx,h,bz,194,4,194,col[0]*.72,col[1]*.72,col[2]*.72);
+  // rooftop equipment
+  cube(bx-48,h+4,bz+35,24,12,22,.12,.13,.14);
+  cube(bx+42,h+4,bz-38,18,9,18,.14,.15,.16);
+  // window bands on two visible sides
+  for(let wx=-70;wx<=70;wx+=35){cube(bx+wx,h*.45,bz-96,18,12,2,.12,.22,.27);cube(bx+wx,h*.70,bz-96,18,12,2,.12,.22,.27);}
+  for(let wz=-70;wz<=70;wz+=35){cube(bx+96,h*.52,bz+wz,2,12,18,.12,.22,.27);}
+}
+
+// trees in green strips
+function tree(tx,tz){
+  cube(tx,0,tz,10,26,10,.23,.14,.08);
+  cube(tx,24,tz,34,30,34,.10,.30,.16);
+  cube(tx,42,tz,25,22,25,.08,.38,.19);
+}
+for(const tx of [-111,-489,489,1111]) for(let tz=-1200;tz<=1200;tz+=180) tree(tx,tz);
+
+// Donau — broad blue water with a proper bank
+cube(0,-.02,1080,3900,.03,300,.05,.22,.34);
+cube(0,.02,925,3900,.05,18,.36,.42,.36);
+cube(0,.02,1235,3900,.05,18,.36,.42,.36);
+// bridge
+cube(0,.08,1080,220,.12,320,.18,.19,.20);
+for(let xx=-90;xx<=90;xx+=30)cube(xx,.2,1080,6,10,330,.16,.17,.18);
+
+// Münster — taller, layered and more recognizable
+cube(0,0,-690,150,105,118,.58,.54,.45);
+cube(0,0,-745,58,330,58,.68,.63,.52);
+cube(0,330,-745,76,70,76,.73,.68,.56);
+cube(0,400,-745,16,65,16,.24,.22,.18);
+cube(0,465,-745,7,30,7,.70,.65,.52);
+for(const sx of [-18,18]) for(const sz of [-18,18]) cube(sx,270,-745+sz,8,55,8,.48,.45,.38);
 // Bahnhof + shops
-cube(-500,0,650,230,60,110,.36,.39,.41);cube(510,0,-420,130,65,90,.34,.23,.18);cube(510,65,-420,70,30,18,.12,.12,.12);
+cube(-500,0,650,240,65,125,.32,.36,.39);
+cube(-500,65,650,250,7,132,.18,.20,.22);
+for(let wx=-590;wx<=-410;wx+=36)cube(wx,28,585,22,18,3,.10,.23,.28);
+cube(510,0,-420,140,70,95,.34,.23,.18);
+cube(510,70,-420,78,32,20,.12,.12,.12);
+cube(720,0,420,155,52,120,.31,.33,.35);
+
+// street lamps and signs
+for(const rx of roadXs) for(let zz=-1050;zz<=1050;zz+=180){
+  cube(rx-62,0,zz,4,45,4,.07,.07,.07); cube(rx-55,44,zz,14,4,4,.12,.12,.12);
+  cube(rx+62,0,zz,4,45,4,.07,.07,.07); cube(rx+55,44,zz,14,4,4,.12,.12,.12);
+}
+
 // traffic
 for(let i=0;i<13;i++)car(-80+i*18,-220-i*145,i%3===0?.75:i%3===1?.08:.12,i%3===0?.10:i%3===1?.35:.32,i%3===0?.08:i%3===1?.7:.7);
 for(let i=0;i<24;i++)npc(-270+(i%12)*45,250+Math.floor(i/12)*60,i%2?[.12,.35,.7]:[.65,.12,.12]);
@@ -64,7 +129,7 @@ function loop(){
  movePlayer(); drawMap();
  if(step===0&&Math.hypot(x,z-650)<150){step=1;document.getElementById('mission').innerHTML='⛪ <b>MÜNSTER</b> — Geh/Fahr zum Münster'}
  if(step===1&&Math.hypot(x,z+745)<175){step=2;money+=300;document.getElementById('money').textContent=money;document.getElementById('mission').innerHTML='🌊 <b>DONAU</b> — Freie Fahrt'}
- g.enable(g.DEPTH_TEST);g.clearColor(.43,.57,.65,1);g.clear(g.COLOR_BUFFER_BIT|g.DEPTH_BUFFER_BIT);
+ g.enable(g.DEPTH_TEST);g.enable(g.CULL_FACE);g.clearColor(.16,.22,.28,1);g.clear(g.COLOR_BUFFER_BIT|g.DEPTH_BUFFER_BIT);
  g.bindBuffer(g.ARRAY_BUFFER,vb);g.enableVertexAttribArray(AP);g.vertexAttribPointer(AP,3,g.FLOAT,false,0,0);g.bindBuffer(g.ARRAY_BUFFER,cb);g.enableVertexAttribArray(AC);g.vertexAttribPointer(AC,3,g.FLOAT,false,0,0);
  g.uniformMatrix4fv(UM,false,mul(persp(1.04,innerWidth/innerHeight,.1,4200),view(x,y,z,yaw,pitch)));g.drawArrays(g.TRIANGLES,0,P.length/3);requestAnimationFrame(loop)
 }/*loop disabled in V8*/;
@@ -114,11 +179,20 @@ function v9Update(dt){
 }
 function drawDynamic(){
  P.length=0;C.length=0;P.push(...baseP);C.push(...baseC);
- for(const car of dynCars){let [r,g,b]=car.color;cube(car.x,3,car.z,5,2.2,9,r,g,b);cube(car.x,4.3,car.z-.4,3.6,1.2,4.4,.12,.15,.2);cube(car.x-1.8,2.4,car.z-2.5,.5,.7,1.5,.02,.02,.02);cube(car.x+1.8,2.4,car.z-2.5,.5,.7,1.5,.02,.02,.02)}
+ for(const car of dynCars){
+ let [r,g,b]=car.color;
+ cube(car.x,3,car.z,7,2.8,13,r,g,b);
+ cube(car.x,5.2,car.z-.7,5.2,1.7,6.2,r*.82,g*.82,b*.82);
+ cube(car.x-2.4,2.6,car.z-4.1,1.1,1.1,2,.025,.025,.025);
+ cube(car.x+2.4,2.6,car.z-4.1,1.1,1.1,2,.025,.025,.025);
+ cube(car.x-2.4,2.6,car.z+4.1,1.1,1.1,2,.8,.08,.05);
+ cube(car.x+2.4,2.6,car.z+4.1,1.1,1.1,2,.8,.08,.05);
+ cube(car.x,6.2,car.z-3.9,3.8,.5,.8,.75,.75,.65);
+}
  for(const p of dynPeds){cube(p.x,2,p.z,1,3.5,1,.08,.35,.65);cube(p.x,4.2,p.z,.9,1,.9,.75,.55,.35)}
  for(const q of police){cube(q.x,3,q.z,5.2,2.4,9,.05,.12,.55);cube(q.x,4.4,q.z-.4,3.8,1.2,4.5,.08,.1,.2);cube(q.x,5.1,q.z,.9,.25,1.5,.8,.8,.9)}
 }
-function drawMap(){const m=document.getElementById('mapc'),q=m.getContext('2d');q.clearRect(0,0,236,236);q.fillStyle='#1b252b';q.fillRect(0,0,236,236);q.fillStyle='#39434a';q.fillRect(0,104,236,28);q.fillRect(104,0,28,236);q.fillStyle='#36a7ff';q.beginPath();q.arc(118,118,6,0,7);q.fill();q.fillStyle='#ffcc33';q.beginPath();q.arc(118+Math.max(-100,Math.min(100,x/12)),118+Math.max(-100,Math.min(100,z/12)),4,0,7);q.fill();q.fillStyle='#ff3344';for(const p of police){let px=118+Math.max(-105,Math.min(105,(p.x-x)/10)),py=118+Math.max(-105,Math.min(105,(p.z-z)/10));q.beginPath();q.arc(px,py,4,0,7);q.fill()}}
+function drawMap(){const m=document.getElementById('mapc'),q=m.getContext('2d');q.clearRect(0,0,236,236);q.fillStyle='#17231d';q.fillRect(0,0,236,236);q.fillStyle='#2f383e';for(let i=0;i<5;i++){q.fillRect(i*47,0,13,236);q.fillRect(0,i*47,236,13);}q.fillStyle='#1f78a0';q.fillRect(0,103,236,30);q.fillStyle='#d0b35a';q.fillRect(0,117,236,2);q.fillStyle='#36a7ff';q.beginPath();q.arc(118,118,6,0,7);q.fill();q.fillStyle='#ffcc33';q.beginPath();q.arc(118+Math.max(-100,Math.min(100,x/12)),118+Math.max(-100,Math.min(100,z/12)),4,0,7);q.fill();q.fillStyle='#ff3344';for(const p of police){let px=118+Math.max(-105,Math.min(105,(p.x-x)/10)),py=118+Math.max(-105,Math.min(105,(p.z-z)/10));q.beginPath();q.arc(px,py,4,0,7);q.fill()}}
 function fireWeapon(){if(carMode){toast('🚗 Im Auto kannst du nicht schießen');return}if(heat>0){toast('⏳ Waffe kühlt ab');return}if(!weapon.ammo){toast('Keine Munition — 🔄 nachladen');return}weapon.ammo--;heat=.25;wanted=Math.min(5,wanted+weapon.wanted);money+=5;
  let best=-1,bd=999;for(let i=0;i<dynPeds.length;i++){let dx=dynPeds[i].x-x,dz=dynPeds[i].z-z,d=Math.hypot(dx,dz),ang=Math.abs(Math.atan2(dx,-dz)-yaw);ang=Math.min(ang,Math.PI*2-ang);if(d<bd&&d<weapon.range&&ang<.3)best=i,bd=d}
  if(best>=0){dynPeds[best].hp-=weapon.damage;if(dynPeds[best].hp<=0){dynPeds.splice(best,1);money+=50;gainXP(25);toast('💥 TREFFER +50 €')}else toast('💥 TREFFER')}else toast('💥 Schuss');
@@ -129,7 +203,7 @@ addEventListener('keydown',e=>{let m={w:'f',ArrowUp:'f',s:'b',ArrowDown:'b',a:'l
 for(const el of document.querySelectorAll('.b[data-k]')){el.addEventListener('pointerdown',()=>k[el.dataset.k]=1);el.addEventListener('pointerup',()=>k[el.dataset.k]=0);el.addEventListener('pointercancel',()=>k[el.dataset.k]=0);}
 document.getElementById('fire').onpointerdown=fireWeapon;document.getElementById('swap').onpointerdown=reload;document.getElementById('weaponBtn').onpointerdown=switchWeapon;
 const gun=document.createElement('div');gun.textContent='🔫';gun.style='position:fixed;right:22px;bottom:118px;font-size:76px;transform:rotate(-12deg);z-index:8;pointer-events:none;filter:drop-shadow(0 5px 5px #000)';document.body.appendChild(gun);
-let last=performance.now();function loopV9(now){let dt=Math.min(.05,(now-last)/1000);last=now;movePlayer();v9Update(dt);drawDynamic();drawMap();g.enable(g.DEPTH_TEST);g.clearColor(.43,.57,.65,1);g.clear(g.COLOR_BUFFER_BIT|g.DEPTH_BUFFER_BIT);g.bindBuffer(g.ARRAY_BUFFER,vb);g.bufferData(g.ARRAY_BUFFER,new Float32Array(P),g.DYNAMIC_DRAW);g.enableVertexAttribArray(AP);g.vertexAttribPointer(AP,3,g.FLOAT,false,0,0);g.bindBuffer(g.ARRAY_BUFFER,cb);g.bufferData(g.ARRAY_BUFFER,new Float32Array(C),g.DYNAMIC_DRAW);g.enableVertexAttribArray(AC);g.vertexAttribPointer(AC,3,g.FLOAT,false,0,0);g.uniformMatrix4fv(UM,false,mul(persp(1.04,innerWidth/innerHeight,.1,4200),view(x,y,z,yaw,pitch)));g.drawArrays(g.TRIANGLES,0,P.length/3);requestAnimationFrame(loopV9)}
+let last=performance.now();function loopV9(now){let dt=Math.min(.05,(now-last)/1000);last=now;movePlayer();v9Update(dt);drawDynamic();drawMap();g.enable(g.DEPTH_TEST);g.enable(g.CULL_FACE);g.clearColor(.16,.22,.28,1);g.clear(g.COLOR_BUFFER_BIT|g.DEPTH_BUFFER_BIT);g.bindBuffer(g.ARRAY_BUFFER,vb);g.bufferData(g.ARRAY_BUFFER,new Float32Array(P),g.DYNAMIC_DRAW);g.enableVertexAttribArray(AP);g.vertexAttribPointer(AP,3,g.FLOAT,false,0,0);g.bindBuffer(g.ARRAY_BUFFER,cb);g.bufferData(g.ARRAY_BUFFER,new Float32Array(C),g.DYNAMIC_DRAW);g.enableVertexAttribArray(AC);g.vertexAttribPointer(AC,3,g.FLOAT,false,0,0);g.uniformMatrix4fv(UM,false,mul(persp(1.04,innerWidth/innerHeight,.1,4200),view(x,y,z,yaw,pitch)));g.drawArrays(g.TRIANGLES,0,P.length/3);requestAnimationFrame(loopV9)}
 requestAnimationFrame(loopV9);
 
 </script>
