@@ -1,0 +1,58 @@
+<!doctype html><html lang="de"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no"><title>Ulm Street V2</title>
+<style>
+*{box-sizing:border-box}html,body{margin:0;height:100%;overflow:hidden;background:#111;color:#fff;font-family:-apple-system,BlinkMacSystemFont,system-ui,sans-serif;touch-action:none}
+canvas{width:100vw;height:100vh;display:block}.hud{position:fixed;top:10px;left:10px;right:10px;display:flex;justify-content:space-between;gap:8px;pointer-events:none}.pill{background:#111c;border:1px solid #fff3;border-radius:12px;padding:8px 11px;font-weight:800;text-shadow:0 2px 4px #000}.mission{position:fixed;top:58px;left:50%;transform:translateX(-50%);background:#111d;border-radius:12px;padding:8px 13px;text-align:center;font-size:13px;max-width:90%}
+.controls{position:fixed;left:0;right:0;bottom:12px;display:flex;justify-content:space-between;padding:0 18px;pointer-events:none}.pad{width:154px;height:154px;position:relative;pointer-events:auto}.b{position:absolute;width:52px;height:52px;border-radius:50%;background:#fff2;border:1px solid #fff5;display:flex;align-items:center;justify-content:center;font-size:20px;font-weight:900;user-select:none}.u{left:51px}.d{left:51px;bottom:0}.l{left:0;top:51px}.r{right:0;top:51px}.action{pointer-events:auto;align-self:flex-end}.act{position:relative!important;right:auto!important;bottom:auto!important;width:72px;height:72px;background:#d52f2fcc}
+#panel{display:none;position:fixed;left:50%;top:50%;transform:translate(-50%,-50%);width:min(340px,88vw);background:#15171bdd;border:1px solid #fff3;border-radius:20px;padding:20px;text-align:center;box-shadow:0 20px 60px #000b}#panel button{border:0;border-radius:12px;padding:11px 16px;font-weight:800}
+</style></head><body>
+<canvas id="c"></canvas><div class="hud"><div class="pill">💶 <span id="money">500</span> €</div><div class="pill">⭐ <span id="wanted">0</span></div><div class="pill">📍 <span id="place">Innenstadt</span></div></div>
+<div class="mission" id="mission">📦 Auftrag: Hole das Paket am Bahnhof ab</div>
+<div class="controls"><div class="pad"><div class="b u" data-k="up">▲</div><div class="b d" data-k="down">▼</div><div class="b l" data-k="left">◀</div><div class="b r" data-k="right">▶</div></div><div class="action"><div class="b act" id="act">🚗</div></div></div>
+<div id="panel"><h2 id="pt">Mission geschafft! 🎉</h2><p id="pd">+250 €</p><button onclick="hidePanel()">Weiter</button></div>
+<script>
+const c=document.getElementById('c'),g=c.getContext('2d');let W,H,dpr;
+function resize(){dpr=devicePixelRatio||1;W=innerWidth;H=innerHeight;c.width=W*dpr;c.height=H*dpr;g.setTransform(dpr,0,0,dpr,0,0)}resize();addEventListener('resize',resize);
+const key={up:0,down:0,left:0,right:0};document.querySelectorAll('[data-k]').forEach(e=>{e.onpointerdown=ev=>{ev.preventDefault();key[e.dataset.k]=1};e.onpointerup=e.onpointercancel=e.onpointerleave=()=>key[e.dataset.k]=0});
+addEventListener('keydown',e=>{const m={ArrowUp:'up',w:'up',ArrowDown:'down',s:'down',ArrowLeft:'left',a:'left',ArrowRight:'right',d:'right'};if(m[e.key])key[m[e.key]]=1});addEventListener('keyup',e=>{const m={ArrowUp:'up',w:'up',ArrowDown:'down',s:'down',ArrowLeft:'left',a:'left',ArrowRight:'right',d:'right'};if(m[e.key])key[m[e.key]]=0});
+const world={w:3000,h:2200}, p={x:820,y:1040,a:0,v:0,car:true};let money=500,wanted=0,mission=0,missionDone=false;
+const spots=[
+{x:1500,y:1030,n:'ULMER MÜNSTER',r:100,t:'landmark'},
+{x:600,y:1030,n:'BAHNHOF',r:75,t:'station'},
+{x:2370,y:1030,n:'DONAU',r:95,t:'river'},
+{x:1980,y:520,n:'TANKSTELLE',r:60,t:'shop'},
+{x:430,y:1640,n:'SHOP',r:55,t:'shop'}];
+const buildings=[
+[70,90,500,260],[700,90,440,260],[1370,90,500,260],[2000,90,470,260],
+[70,520,500,260],[700,520,440,260],[1370,520,500,260],[2000,520,470,260],
+[70,1410,500,300],[700,1410,440,300],[1370,1410,500,300],[2000,1410,470,300]];
+const npcs=[];for(let i=0;i<24;i++)npcs.push({x:120+Math.random()*2550,y:380+Math.random()*1300,vx:(Math.random()-.5)*.7,vy:(Math.random()-.5)*.7});
+const cars=[];for(let i=0;i<16;i++)cars.push({x:Math.random()*2800,y:[400,700,1050,1350][i%4]+(Math.random()*50-25),a:Math.random()<.5?0:Math.PI/2});
+function dist(a,b){return Math.hypot(a.x-b.x,a.y-b.y)}
+function panel(t,d){document.getElementById('pt').textContent=t;document.getElementById('pd').textContent=d;document.getElementById('panel').style.display='block'}function hidePanel(){document.getElementById('panel').style.display='none'}
+document.getElementById('act').onpointerdown=()=>{p.car=!p.car;document.getElementById('act').textContent=p.car?'🚗':'🚶'};
+function update(){
+ if(p.car){p.a+=(key.right-key.left)*.06;p.v+=(key.up-key.down)*.24;p.v*=.94;p.v=Math.max(-3.5,Math.min(7,p.v));p.x+=Math.cos(p.a)*p.v;p.y+=Math.sin(p.a)*p.v}else{p.x+=(key.right-key.left)*3;p.y+=(key.down-key.up)*3}
+ p.x=Math.max(30,Math.min(world.w-30,p.x));p.y=Math.max(30,Math.min(world.h-30,p.y));
+ npcs.forEach(n=>{n.x+=n.vx;n.y+=n.vy;if(n.x<30||n.x>2970)n.vx*=-1;if(n.y<350||n.y>1900)n.vy*=-1});
+ if(mission===0&&dist(p,spots[1])<115){mission=1;document.getElementById('mission').textContent='📦 Paket abgeholt – bring es zum Münster'}
+ if(mission===1&&dist(p,spots[0])<145){mission=2;money+=250;document.getElementById('money').textContent=money;document.getElementById('mission').textContent='💰 Auftrag erledigt – neuer Auftrag kommt';panel('Mission geschafft! 🎉','+250 € — Neuer Auftrag: Tanke das Auto.')}
+ if(mission===2&&dist(p,spots[3])<100){mission=3;money+=150;document.getElementById('money').textContent=money;document.getElementById('mission').textContent='⛽ Getankt – fahr zur Donau';panel('Getankt! ⛽','+150 €')}
+ if(mission===3&&dist(p,spots[2])<140){mission=4;money+=300;wanted=Math.min(5,wanted+1);document.getElementById('money').textContent=money;document.getElementById('wanted').textContent=wanted;document.getElementById('mission').textContent='⭐ Auftrag erledigt – freie Fahrt';panel('Auftrag abgeschlossen!','+300 €')}
+}
+function draw(){
+ g.clearRect(0,0,W,H);let cx=Math.max(0,Math.min(world.w-W,p.x-W/2)),cy=Math.max(0,Math.min(world.h-H,p.y-H/2));g.save();g.translate(-cx,-cy);
+ g.fillStyle='#39413d';g.fillRect(0,0,world.w,world.h);
+ g.fillStyle='#252a2b';[400,700,1050,1350].forEach(y=>g.fillRect(0,y-55,world.w,110));[620,1260,1900].forEach(x=>g.fillRect(x-55,0,110,world.h));
+ g.strokeStyle='#d2c35d';g.lineWidth=3;g.setLineDash([28,24]);[400,700,1050,1350].forEach(y=>{g.beginPath();g.moveTo(0,y);g.lineTo(world.w,y);g.stroke()});[620,1260,1900].forEach(x=>{g.beginPath();g.moveTo(x,0);g.lineTo(x,world.h);g.stroke()});g.setLineDash([]);
+ buildings.forEach(b=>{g.fillStyle='#77665b';g.fillRect(...b);g.fillStyle='#a38a76';for(let xx=b[0]+18;xx<b[0]+b[2]-15;xx+=48)for(let yy=b[1]+18;yy<b[1]+b[3]-15;yy+=48)g.fillRect(xx,yy,22,24)});
+ // Donau
+ g.fillStyle='#36758b';g.fillRect(0,930,world.w,190);g.fillStyle='#4e93a5';for(let i=0;i<30;i++)g.fillRect(i*105,1010+(i%3)*12,55,3);
+ spots.forEach((s,i)=>{if(i===2)return;g.fillStyle=i===0?'#bba36d':i===1?'#69737a':'#b66f43';g.beginPath();g.arc(s.x,s.y,s.r,0,Math.PI*2);g.fill();g.fillStyle='#fff';g.font='bold 17px system-ui';g.textAlign='center';g.fillText(s.n,s.x,s.y+s.r+22)});
+ // Münster tower
+ g.fillStyle='#d8c79a';g.fillRect(1460,840,80,170);g.beginPath();g.moveTo(1460,840);g.lineTo(1500,740);g.lineTo(1540,840);g.fill();
+ npcs.forEach(n=>{g.fillStyle='#e8b08c';g.beginPath();g.arc(n.x,n.y,7,0,7);g.fill();g.fillStyle='#4b78b8';g.fillRect(n.x-5,n.y+7,10,13)});
+ cars.forEach(q=>{g.save();g.translate(q.x,q.y);g.rotate(q.a);g.fillStyle='#b93b3b';g.fillRect(-18,-9,36,18);g.fillStyle='#a9cddd';g.fillRect(-4,-7,12,14);g.restore()});
+ g.save();g.translate(p.x,p.y);g.rotate(p.a);g.fillStyle=p.car?'#e53935':'#3aa5ff';g.fillRect(-20,-11,40,22);if(p.car){g.fillStyle='#a8d5e6';g.fillRect(0,-8,12,16)}g.restore();g.restore();
+ let near=spots.reduce((a,s)=>dist(p,s)<dist(p,a)?s:a,spots[0]);document.getElementById('place').textContent=dist(p,near)<170?near.n:'Ulm';}
+function loop(){update();draw();requestAnimationFrame(loop)}loop();
+</script></body></html>
