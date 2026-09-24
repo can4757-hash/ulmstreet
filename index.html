@@ -14,6 +14,7 @@ canvas{width:100vw;height:100vh;display:block}
 .actions{width:165px;height:150px;position:relative;pointer-events:auto}.fire{right:0;bottom:58px!important;width:70px;height:70px;background:#c93131e8}.enter{right:72px;bottom:8px!important;background:#247caee8}.swap{right:0;bottom:8px!important;background:#6951a8e8}.weapon{right:72px;bottom:62px!important;background:#8a5a24e8}
 #toast{display:none;position:fixed;bottom:172px;left:50%;transform:translateX(-50%);background:#0b1119ed;border:1px solid #fff2;border-radius:11px;padding:8px 12px;font-size:12px;font-weight:800}
 #map{position:fixed;right:12px;top:58px;width:118px;height:118px;border-radius:14px;background:#081018cc;border:1px solid #fff3;box-shadow:0 6px 20px #0008;z-index:9;overflow:hidden}#map canvas{width:118px;height:118px}#speed{position:fixed;right:12px;bottom:175px;background:#0b1119dd;border:1px solid #fff2;border-radius:11px;padding:7px 10px;font:800 12px system-ui;z-index:9}
+</style>
 </head>
 <body>
 <canvas id="game"></canvas>
@@ -76,6 +77,8 @@ const weapons=[
  {name:'SHOTGUN',ammo:6,max:6,damage:70,range:18,wanted:3}
 ];
 let weaponIndex=0, weapon=weapons[0], hp=100, cooldown=0, heat=0, sprint=false, speedKmh=0, level=1, xp=0;
+const solid=[];
+for(let xx=-1500;xx<=1500;xx+=300)for(let zz=-1000;zz<=1000;zz+=300){if(Math.abs(xx)<170||Math.abs(zz)<170)continue;solid.push([xx,zz,185,185]);}
 const dynCars=[{x:-24,z:625,a:0,s:4.0,color:[.05,.35,.75]},{x:24,z:642,a:Math.PI,s:3.2,color:[.75,.08,.08]},{x:0,z:675,a:0,s:3.6,color:[.75,.55,.08]},{x:-38,z:655,a:0,s:2.8,color:[.12,.65,.35]}];
 const dynPeds=[{x:-10,z:618,t:0,hp:100},{x:12,z:632,t:1,hp:100},{x:30,z:660,t:2,hp:100},{x:-30,z:670,t:3,hp:100},{x:18,z:690,t:4,hp:100},{x:0,z:610,t:5,hp:100}];
 let police=[];
