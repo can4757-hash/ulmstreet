@@ -22,11 +22,11 @@ canvas{width:100vw;height:100vh;display:block}
 <div id="mission">📦 BAHNHOF — Hol das Paket ab</div><div id="cross"></div><div id="toast"></div><div id="map"><canvas id="mapc" width="236" height="236"></canvas></div><div id="speed">0 km/h</div>
 <div id="controls"><div class="pad"><div class="b u" data-k="f">▲</div><div class="b d" data-k="b">▼</div><div class="b l" data-k="l">◀</div><div class="b r" data-k="r">▶</div></div><div class="actions"><div class="b fire" id="fire">🔫</div><div class="b enter" id="enter">🚗</div><div class="b swap" id="swap">🔄</div><div class="b weapon" id="weaponBtn">🔫</div></div></div>
 <script>
-const c=document.getElementById('game'),g=c.getContext('webgl',{antialias:true});
+const c=document.getElementById('game'); let g=null; try{g=c.getContext('webgl',{antialias:true,alpha:false})||c.getContext('experimental-webgl',{antialias:true,alpha:false});}catch(e){} if(!g){document.getElementById('toast').textContent='WebGL ist auf diesem Gerät nicht verfügbar';document.getElementById('toast').style.display='block'; throw new Error('WebGL unavailable');}
 const V=`attribute vec3 p;attribute vec3 c;uniform mat4 m;varying vec3 v;void main(){gl_Position=m*vec4(p,1.);v=c;}`;
 const F=`precision mediump float;varying vec3 v;void main(){gl_FragColor=vec4(v,1.);}`;
 function S(t,s){let q=g.createShader(t);g.shaderSource(q,s);g.compileShader(q);return q}
-let pr=g.createProgram();g.attachShader(pr,S(g.VERTEX_SHADER,V));g.attachShader(pr,S(g.FRAGMENT_SHADER,F));g.linkProgram(pr);g.useProgram(pr);
+let pr=g.createProgram();g.attachShader(pr,S(g.VERTEX_SHADER,V));g.attachShader(pr,S(g.FRAGMENT_SHADER,F));g.linkProgram(pr);if(!g.getShaderParameter(g.getAttachedShaders(pr)[0],g.COMPILE_STATUS)){}if(!g.getProgramParameter(pr,g.LINK_STATUS)){document.getElementById('toast').textContent='3D konnte nicht geladen werden';document.getElementById('toast').style.display='block';}g.useProgram(pr);
 const AP=g.getAttribLocation(pr,'p'),AC=g.getAttribLocation(pr,'c'),UM=g.getUniformLocation(pr,'m');
 let P=[],C=[];
 function cube(x,y,z,w,h,d,r,gg,b){
@@ -129,7 +129,7 @@ function loop(){
  movePlayer(); drawMap();
  if(step===0&&Math.hypot(x,z-650)<150){step=1;document.getElementById('mission').innerHTML='⛪ <b>MÜNSTER</b> — Geh/Fahr zum Münster'}
  if(step===1&&Math.hypot(x,z+745)<175){step=2;money+=300;document.getElementById('money').textContent=money;document.getElementById('mission').innerHTML='🌊 <b>DONAU</b> — Freie Fahrt'}
- g.enable(g.DEPTH_TEST);g.enable(g.CULL_FACE);g.clearColor(.16,.22,.28,1);g.clear(g.COLOR_BUFFER_BIT|g.DEPTH_BUFFER_BIT);
+ g.enable(g.DEPTH_TEST);g.disable(g.CULL_FACE);g.clearColor(.10,.16,.22,1);g.clear(g.COLOR_BUFFER_BIT|g.DEPTH_BUFFER_BIT);
  g.bindBuffer(g.ARRAY_BUFFER,vb);g.enableVertexAttribArray(AP);g.vertexAttribPointer(AP,3,g.FLOAT,false,0,0);g.bindBuffer(g.ARRAY_BUFFER,cb);g.enableVertexAttribArray(AC);g.vertexAttribPointer(AC,3,g.FLOAT,false,0,0);
  g.uniformMatrix4fv(UM,false,mul(persp(1.04,innerWidth/innerHeight,.1,4200),view(x,y,z,yaw,pitch)));g.drawArrays(g.TRIANGLES,0,P.length/3);requestAnimationFrame(loop)
 }/*loop disabled in V8*/;
@@ -203,7 +203,7 @@ addEventListener('keydown',e=>{let m={w:'f',ArrowUp:'f',s:'b',ArrowDown:'b',a:'l
 for(const el of document.querySelectorAll('.b[data-k]')){el.addEventListener('pointerdown',()=>k[el.dataset.k]=1);el.addEventListener('pointerup',()=>k[el.dataset.k]=0);el.addEventListener('pointercancel',()=>k[el.dataset.k]=0);}
 document.getElementById('fire').onpointerdown=fireWeapon;document.getElementById('swap').onpointerdown=reload;document.getElementById('weaponBtn').onpointerdown=switchWeapon;
 const gun=document.createElement('div');gun.textContent='🔫';gun.style='position:fixed;right:22px;bottom:118px;font-size:76px;transform:rotate(-12deg);z-index:8;pointer-events:none;filter:drop-shadow(0 5px 5px #000)';document.body.appendChild(gun);
-let last=performance.now();function loopV9(now){let dt=Math.min(.05,(now-last)/1000);last=now;movePlayer();v9Update(dt);drawDynamic();drawMap();g.enable(g.DEPTH_TEST);g.enable(g.CULL_FACE);g.clearColor(.16,.22,.28,1);g.clear(g.COLOR_BUFFER_BIT|g.DEPTH_BUFFER_BIT);g.bindBuffer(g.ARRAY_BUFFER,vb);g.bufferData(g.ARRAY_BUFFER,new Float32Array(P),g.DYNAMIC_DRAW);g.enableVertexAttribArray(AP);g.vertexAttribPointer(AP,3,g.FLOAT,false,0,0);g.bindBuffer(g.ARRAY_BUFFER,cb);g.bufferData(g.ARRAY_BUFFER,new Float32Array(C),g.DYNAMIC_DRAW);g.enableVertexAttribArray(AC);g.vertexAttribPointer(AC,3,g.FLOAT,false,0,0);g.uniformMatrix4fv(UM,false,mul(persp(1.04,innerWidth/innerHeight,.1,4200),view(x,y,z,yaw,pitch)));g.drawArrays(g.TRIANGLES,0,P.length/3);requestAnimationFrame(loopV9)}
+let last=performance.now();function loopV9(now){let dt=Math.min(.05,(now-last)/1000);last=now;movePlayer();v9Update(dt);drawDynamic();drawMap();g.enable(g.DEPTH_TEST);g.disable(g.CULL_FACE);g.clearColor(.10,.16,.22,1);g.clear(g.COLOR_BUFFER_BIT|g.DEPTH_BUFFER_BIT);g.bindBuffer(g.ARRAY_BUFFER,vb);g.bufferData(g.ARRAY_BUFFER,new Float32Array(P),g.DYNAMIC_DRAW);g.enableVertexAttribArray(AP);g.vertexAttribPointer(AP,3,g.FLOAT,false,0,0);g.bindBuffer(g.ARRAY_BUFFER,cb);g.bufferData(g.ARRAY_BUFFER,new Float32Array(C),g.DYNAMIC_DRAW);g.enableVertexAttribArray(AC);g.vertexAttribPointer(AC,3,g.FLOAT,false,0,0);g.uniformMatrix4fv(UM,false,mul(persp(1.04,innerWidth/innerHeight,.1,4200),view(x,y,z,yaw,pitch)));g.drawArrays(g.TRIANGLES,0,P.length/3);requestAnimationFrame(loopV9)}
 requestAnimationFrame(loopV9);
 
 </script>
