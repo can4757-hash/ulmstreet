@@ -3,133 +3,94 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no,viewport-fit=cover">
-<title>ULM STREET V3</title>
+<title>ULM STREET V4 — 3D</title>
 <style>
-*{box-sizing:border-box}html,body{margin:0;height:100%;overflow:hidden;background:#0b0d10;color:#fff;font-family:-apple-system,BlinkMacSystemFont,system-ui,sans-serif;touch-action:none}
-canvas{display:block;width:100vw;height:100vh}
-#top{position:fixed;top:10px;left:10px;right:10px;display:flex;gap:7px;align-items:center;pointer-events:none}
-.card{background:rgba(8,10,14,.82);border:1px solid rgba(255,255,255,.12);backdrop-filter:blur(8px);border-radius:12px;padding:7px 10px;font-weight:800;font-size:13px;box-shadow:0 4px 20px #0005}
-#mission{position:fixed;top:58px;left:50%;transform:translateX(-50%);width:max-content;max-width:92vw;text-align:center;background:#0a0c10e8;border:1px solid #ffffff18;border-radius:13px;padding:8px 12px;font-size:13px;box-shadow:0 6px 24px #0007}
-#mini{position:fixed;right:10px;top:104px;width:118px;height:82px;border-radius:10px;border:1px solid #fff3;background:#111;overflow:hidden;box-shadow:0 5px 18px #0008}
-#controls{position:fixed;left:0;right:0;bottom:max(12px,env(safe-area-inset-bottom));display:flex;justify-content:space-between;padding:0 17px;pointer-events:none}
-.pad{width:154px;height:154px;position:relative;pointer-events:auto}.btn{position:absolute;width:52px;height:52px;border-radius:50%;background:#ffffff18;border:1px solid #fff3;display:flex;align-items:center;justify-content:center;font-size:19px;font-weight:900;color:#fff;box-shadow:0 5px 15px #0006;user-select:none}
-.u{left:51px}.d{left:51px;bottom:0}.l{left:0;top:51px}.r{right:0;top:51px}
-.actions{width:150px;position:relative;pointer-events:auto}.act{right:0;bottom:42px!important;width:70px;height:70px;background:#d73636d9}.hand{right:70px;bottom:5px!important;width:50px;height:50px;background:#ffffff20}
-#toast{position:fixed;left:50%;bottom:178px;transform:translateX(-50%);background:#0b0d10e8;border:1px solid #fff2;border-radius:12px;padding:9px 13px;display:none;font-weight:800;white-space:nowrap}
-#panel{display:none;position:fixed;left:50%;top:50%;transform:translate(-50%,-50%);width:min(350px,88vw);background:#101318f2;border:1px solid #fff2;border-radius:20px;padding:20px;text-align:center;box-shadow:0 25px 80px #000b}
-#panel h2{margin:0 0 8px}.btn2{border:0;background:#fff;color:#111;border-radius:11px;padding:10px 17px;font-weight:900}
+html,body{margin:0;height:100%;overflow:hidden;background:#87a8bb;font-family:-apple-system,BlinkMacSystemFont,system-ui,sans-serif;touch-action:none;color:#fff}
+canvas{width:100vw;height:100vh;display:block}
+#hud{position:fixed;top:10px;left:10px;right:10px;display:flex;gap:7px;pointer-events:none}
+.p{background:#10151bcc;border:1px solid #fff2;border-radius:11px;padding:7px 10px;font-weight:800;font-size:13px}
+#mission{position:fixed;top:58px;left:50%;transform:translateX(-50%);background:#10151bdc;border:1px solid #fff2;border-radius:12px;padding:8px 12px;font-size:13px;white-space:nowrap}
+#cross{position:fixed;left:50%;top:50%;width:14px;height:14px;transform:translate(-50%,-50%);pointer-events:none}
+#cross:before,#cross:after{content:"";position:absolute;background:#fff;box-shadow:0 0 4px #000}.before{}
+#cross:before{width:14px;height:2px;top:6px}.cross:after{width:2px;height:14px;left:6px}
+#cross:after{content:"";position:absolute;width:2px;height:14px;left:6px;top:0;background:#fff;box-shadow:0 0 4px #000}
+#controls{position:fixed;left:0;right:0;bottom:max(12px,env(safe-area-inset-bottom));display:flex;justify-content:space-between;padding:0 16px;pointer-events:none}
+.stick{width:145px;height:145px;border-radius:50%;position:relative;pointer-events:auto;background:#ffffff08}
+.b{position:absolute;width:50px;height:50px;border-radius:50%;background:#10151baa;border:1px solid #fff3;display:flex;align-items:center;justify-content:center;font-weight:900;font-size:20px;user-select:none}
+.u{left:47px;top:0}.d{left:47px;bottom:0}.l{left:0;top:47px}.r{right:0;top:47px}
+.look{width:150px;height:145px;pointer-events:auto;position:relative}.fire{right:0;bottom:15px;width:68px;height:68px;background:#d43b3bd9}
+#hint{position:fixed;bottom:165px;left:50%;transform:translateX(-50%);background:#10151bc9;padding:7px 10px;border-radius:10px;font-size:12px;display:none}
 </style>
 </head>
 <body>
-<canvas id="game"></canvas>
-<div id="top"><div class="card">💶 <span id="money">500</span> €</div><div class="card">⭐ <span id="wanted">0</span></div><div class="card">❤️ <span id="hp">100</span></div></div>
-<div id="mission">📦 <b>BAHNHOF</b> · Hol das Paket ab</div><canvas id="mini" width="236" height="164"></canvas>
-<div id="toast"></div>
+<canvas id="gl"></canvas>
+<div id="hud"><div class="p">💶 <span id="money">500</span> €</div><div class="p">⭐ <span id="wanted">0</span></div><div class="p">❤️ <span id="hp">100</span></div></div>
+<div id="mission">📍 <b>BAHNHOF</b> — Geh zum Bahnhof</div>
+<div id="cross"></div><div id="hint"></div>
 <div id="controls">
-  <div class="pad"><div class="btn u" data-k="up">▲</div><div class="btn d" data-k="down">▼</div><div class="btn l" data-k="left">◀</div><div class="btn r" data-k="right">▶</div></div>
-  <div class="actions"><div class="btn hand" id="hand">✋</div><div class="btn act" id="act">🚗</div></div>
+ <div class="stick"><div class="b u" data-k="f">▲</div><div class="b d" data-k="b">▼</div><div class="b l" data-k="l">◀</div><div class="b r" data-k="r">▶</div></div>
+ <div class="look"><div class="b fire" id="action">●</div></div>
 </div>
-<div id="panel"><h2 id="pt">Mission geschafft</h2><p id="pd"></p><button class="btn2" onclick="closePanel()">Weiter</button></div>
 <script>
-const C=document.getElementById('game'),ctx=C.getContext('2d'),M=document.getElementById('mini'),mx=M.getContext('2d');let W,H,D;
-function resize(){D=devicePixelRatio||1;W=innerWidth;H=innerHeight;C.width=W*D;C.height=H*D;ctx.setTransform(D,0,0,D,0,0)}resize();addEventListener('resize',resize);
-const keys={up:0,down:0,left:0,right:0};document.querySelectorAll('[data-k]').forEach(b=>{b.onpointerdown=e=>{e.preventDefault();keys[b.dataset.k]=1};b.onpointerup=b.onpointercancel=b.onpointerleave=()=>keys[b.dataset.k]=0});
-addEventListener('keydown',e=>{const m={ArrowUp:'up',w:'up',ArrowDown:'down',s:'down',ArrowLeft:'left',a:'left',ArrowRight:'right',d:'right'};if(m[e.key])keys[m[e.key]]=1});
-addEventListener('keyup',e=>{const m={ArrowUp:'up',w:'up',ArrowDown:'down',s:'down',ArrowLeft:'left',a:'left',ArrowRight:'right',d:'right'};if(m[e.key])keys[m[e.key]]=0});
-
-const world={w:3600,h:2600},p={x:830,y:1110,a:0,v:0,car:true,hp:100};
-let money=500,wanted=0,step=0,shake=0,flash=0;
-const POI={
-station:{x:650,y:1090,name:'BAHNHOF'},
-munster:{x:1780,y:1090,name:'ULMER MÜNSTER'},
-donau:{x:2820,y:1090,name:'DONAU'},
-tank:{x:2350,y:560,name:'TANKSTELLE'},
-shop:{x:520,y:1880,name:'47 SHOP'}
-};
-const roadsY=[430,760,1090,1420,1770,2110],roadsX=[650,1250,1850,2450,3050];
-const blocks=[];
-for(let ix=0;ix<roadsX.length-1;ix++)for(let iy=0;iy<roadsY.length-1;iy++){
-  const x=roadsX[ix]+65,y=roadsY[iy]+65,w=roadsX[ix+1]-roadsX[ix]-130,h=roadsY[iy+1]-roadsY[iy]-130;
-  blocks.push({x,y,w,h,style:(ix+iy)%4});
+const canvas=document.getElementById('gl'),gl=canvas.getContext('webgl',{antialias:true});
+if(!gl){document.body.innerHTML='<h2 style="padding:30px">WebGL wird auf diesem Gerät nicht unterstützt.</h2>'}
+const vs=`attribute vec3 p;attribute vec3 c;uniform mat4 m;varying vec3 v;void main(){gl_Position=m*vec4(p,1.);v=c;}`;
+const fs=`precision mediump float;varying vec3 v;void main(){gl_FragColor=vec4(v,1.);}`;
+function sh(t,s){let z=gl.createShader(t);gl.shaderSource(z,s);gl.compileShader(z);return z}
+const prog=gl.createProgram();gl.attachShader(prog,sh(gl.VERTEX_SHADER,vs));gl.attachShader(prog,sh(gl.FRAGMENT_SHADER,fs));gl.linkProgram(prog);gl.useProgram(prog);
+const ap=gl.getAttribLocation(prog,'p'),ac=gl.getAttribLocation(prog,'c'),um=gl.getUniformLocation(prog,'m');
+let pos=[],col=[];
+function cube(x,y,z,w,h,d,r,g,b){
+ const X=x+w/2,Y=y+h/2,Z=z+d/2,x0=x-w/2,x1=x+w/2,y0=y,y1=y+h,z0=z-d/2,z1=z+d/2;
+ const V=[[x0,y0,z0],[x1,y0,z0],[x1,y1,z0],[x0,y1,z0],[x0,y0,z1],[x1,y0,z1],[x1,y1,z1],[x0,y1,z1]];
+ const F=[[0,1,2,3],[5,4,7,6],[4,0,3,7],[1,5,6,2],[3,2,6,7],[4,5,1,0]];
+ F.forEach((f,fi)=>{let shade=[.82,.72,.62,.9,1,.68][fi];[0,1,2,0,2,3].forEach(i=>{let q=V[f[i]];pos.push(...q);col.push(r*shade,g*shade,b*shade)})});
 }
-const npcs=[],traffic=[],particles=[];
-for(let i=0;i<45;i++)npcs.push({x:100+Math.random()*3400,y:380+Math.random()*1850,phase:Math.random()*7});
-for(let i=0;i<22;i++)traffic.push({x:Math.random()*3500,y:roadsY[i%roadsY.length]+(Math.random()>.5?20:-20),dir:Math.random()>.5?1:-1,type:i%3});
-
-function toast(s){const t=document.getElementById('toast');t.textContent=s;t.style.display='block';clearTimeout(window.tt);window.tt=setTimeout(()=>t.style.display='none',1600)}
-function panel(t,d){document.getElementById('pt').textContent=t;document.getElementById('pd').textContent=d;document.getElementById('panel').style.display='block'}
-function closePanel(){document.getElementById('panel').style.display='none'}
-function d(a,b){return Math.hypot(a.x-b.x,a.y-b.y)}
-document.getElementById('act').onpointerdown=()=>{p.car=!p.car;p.v=0;document.getElementById('act').textContent=p.car?'🚗':'🚶';toast(p.car?'Eingestiegen':'Ausgestiegen')};
-document.getElementById('hand').onpointerdown=()=>{if(!p.car){if(d(p,POI.shop)<100){money+=50;document.getElementById('money').textContent=money;toast('☕ Kleiner Bonus +50 €')}else toast('Nichts zu interagieren')}}; 
-
-function update(){
- if(p.car){p.a+=(keys.right-keys.left)*.058;p.v+=(keys.up-keys.down)*.25;p.v*=.94;p.v=Math.max(-3.6,Math.min(7.5,p.v));p.x+=Math.cos(p.a)*p.v;p.y+=Math.sin(p.a)*p.v}
- else {p.x+=(keys.right-keys.left)*3.1;p.y+=(keys.down-keys.up)*3.1}
- p.x=Math.max(35,Math.min(world.w-35,p.x));p.y=Math.max(35,Math.min(world.h-35,p.y));
- traffic.forEach(t=>{t.x+=t.dir*(1.1+t.type*.3);if(t.x<-50)t.x=3650;if(t.x>3650)t.x=-50});
- npcs.forEach((n,i)=>{n.x+=Math.cos(n.phase+performance.now()/3000)*.25;n.y+=Math.sin(n.phase+performance.now()/3200)*.22});
- if(step===0&&d(p,POI.station)<135){step=1;document.getElementById('mission').innerHTML='📦 <b>PAKET ABGEHOLT</b> · Bring es zum Münster';toast('Paket im Kofferraum') }
- if(step===1&&d(p,POI.munster)<155){step=2;money+=300;document.getElementById('money').textContent=money;document.getElementById('mission').innerHTML='⛽ <b>TANKSTELLE</b> · Mach den Wagen voll';panel('Lieferung erledigt!','+300 € · Neuer Auftrag: Tankstelle')}
- if(step===2&&d(p,POI.tank)<120){step=3;money+=150;document.getElementById('money').textContent=money;document.getElementById('mission').innerHTML='🌊 <b>DONAU</b> · Triff deinen Kontakt';panel('Getankt!','+150 €')}
- if(step===3&&d(p,POI.donau)<170){step=4;money+=500;wanted=1;document.getElementById('money').textContent=money;document.getElementById('wanted').textContent=wanted;document.getElementById('mission').innerHTML='⭐ <b>FREIE FAHRT</b> · Erkunde Ulm';panel('Kontakt getroffen','+500 € · Fahndung: 1 Stern')}
- if(wanted>0&&Math.random()<.001){wanted=Math.max(0,wanted-1);document.getElementById('wanted').textContent=wanted}
+function plane(){cube(0,-.08,0,4000,.1,3000,.18,.21,.2)}
+plane();
+for(let x=-1200;x<=1200;x+=260)for(let z=-900;z<=900;z+=260){
+ if(Math.abs(x)<150||Math.abs(z)<150)continue;
+ let h=30+Math.random()*55,w=170,d=170;
+ cube(x,0,z,w,h,d,.28+.05*Math.random(),.25+.05*Math.random(),.24+.05*Math.random());
+ // rooftop
+ cube(x,h,z,w+.5,1,d+.5,.12,.12,.12);
 }
-
-function roundedRect(c,x,y,w,h,r){c.beginPath();c.roundRect(x,y,w,h,r);c.fill()}
-function building(b){
- const colors=[['#5b4a43','#80695c'],['#46565a','#657b7d'],['#514b59','#776d83'],['#625243','#8c715b']];
- const cc=colors[b.style];
- ctx.fillStyle='#1d2223';roundedRect(ctx,b.x+7,b.y+10,b.w,b.h,12);
- ctx.fillStyle=cc[0];roundedRect(ctx,b.x,b.y,b.w,b.h,10);
- ctx.fillStyle=cc[1];
- for(let x=b.x+18;x<b.x+b.w-18;x+=42)for(let y=b.y+18;y<b.y+b.h-18;y+=38){ctx.fillRect(x,y,18,13);ctx.fillRect(x+2,y+18,14,7)}
- ctx.fillStyle='#2a2522';ctx.fillRect(b.x+b.w/2-24,b.y+b.h-52,48,52);
-}
-function carSprite(x,y,a,color,scale=1){
- ctx.save();ctx.translate(x,y);ctx.rotate(a);ctx.scale(scale,scale);
- ctx.fillStyle='#151719';roundedRect(ctx,-23,-13,46,26,7);
- ctx.fillStyle=color;roundedRect(ctx,-21,-11,42,22,6);
- ctx.fillStyle='#b9d7df';roundedRect(ctx,-7,-9,18,18,4);
- ctx.fillStyle='#fff';ctx.fillRect(16,-8,3,5);ctx.fillRect(16,3,3,5);
- ctx.fillStyle='#222';ctx.fillRect(-16,-15,9,3);ctx.fillRect(8,-15,9,3);
- ctx.restore();
-}
-function poi(x,y,name,type){
- ctx.save();ctx.translate(x,y);
- ctx.shadowColor='#0008';ctx.shadowBlur=14;
- ctx.fillStyle=type==='munster'?'#cbb88b':type==='water'?'#3f8da4':'#d56b45';ctx.beginPath();ctx.arc(0,0,type==='munster'?65:48,0,7);ctx.fill();ctx.shadowBlur=0;
- ctx.fillStyle='#fff';ctx.font='900 15px system-ui';ctx.textAlign='center';ctx.fillText(name,0,(type==='munster'?90:70));ctx.restore();
-}
-function draw(){
- ctx.clearRect(0,0,W,H);
- const cx=Math.max(0,Math.min(world.w-W,p.x-W/2)),cy=Math.max(0,Math.min(world.h-H,p.y-H/2));
- ctx.save();ctx.translate(-cx,-cy);
- ctx.fillStyle='#303633';ctx.fillRect(0,0,world.w,world.h);
- // water
- ctx.fillStyle='#316f83';ctx.fillRect(0,970,world.w,240);
- for(let i=0;i<40;i++){ctx.strokeStyle='#5c9bab55';ctx.lineWidth=3;ctx.beginPath();ctx.moveTo(i*100,1010+(i%5)*22);ctx.lineTo(i*100+55,1010+(i%5)*22);ctx.stroke()}
- // roads
- ctx.fillStyle='#22282a';roadsY.forEach(y=>ctx.fillRect(0,y-58,world.w,116));roadsX.forEach(x=>ctx.fillRect(x-58,0,116,world.h));
- ctx.strokeStyle='#d7c75e';ctx.lineWidth=3;ctx.setLineDash([30,24]);roadsY.forEach(y=>{ctx.beginPath();ctx.moveTo(0,y);ctx.lineTo(world.w,y);ctx.stroke()});roadsX.forEach(x=>{ctx.beginPath();ctx.moveTo(x,0);ctx.lineTo(x,world.h);ctx.stroke()});ctx.setLineDash([]);
- blocks.forEach(building);
- // crossings
- ctx.fillStyle='#eee';roadsY.forEach(y=>{[650,1250,1850,2450,3050].forEach(x=>{for(let i=-35;i<40;i+=12)ctx.fillRect(x+i,y-52,7,104)})});
- traffic.forEach((t,i)=>carSprite(t.x,t.y,t.dir>0?0:Math.PI,i%4===0?'#d94a42':i%4===1?'#e1a62b':'#4d82b6',.72));
- npcs.forEach(n=>{ctx.fillStyle='#d99a79';ctx.beginPath();ctx.arc(n.x,n.y,6,0,7);ctx.fill();ctx.fillStyle='#3b76a8';ctx.fillRect(n.x-5,n.y+6,10,12)});
- poi(POI.station.x,POI.station.y,'BAHNHOF','station');poi(POI.munster.x,POI.munster.y,'ULMER MÜNSTER','munster');poi(POI.donau.x,POI.donau.y,'DONAU','water');poi(POI.tank.x,POI.tank.y,'TANKSTELLE','station');poi(POI.shop.x,POI.shop.y,'47 SHOP','shop');
- // Münster tower detail
- ctx.fillStyle='#d9c695';ctx.fillRect(1744,920,72,170);ctx.beginPath();ctx.moveTo(1744,920);ctx.lineTo(1780,830);ctx.lineTo(1816,920);ctx.fill();ctx.fillStyle='#7d725c';ctx.fillRect(1760,950,40,40);
- carSprite(p.x,p.y,p.a,p.car?'#e23d3d':'#3ba7e8',p.car?1:0.62);
- ctx.restore();
- drawMini();
-}
-function drawMini(){
- mx.clearRect(0,0,236,164);mx.fillStyle='#171b1c';mx.fillRect(0,0,236,164);
- mx.fillStyle='#263032';roadsY.forEach(y=>mx.fillRect(0,y/world.h*164-4,236,8));roadsX.forEach(x=>mx.fillRect(x/world.w*236-4,0,8,164));
- mx.fillStyle='#3b7e8e';mx.fillRect(0,970/world.h*164,236,240/world.h*164);
- mx.fillStyle='#fff';mx.beginPath();mx.arc(POI.munster.x/world.w*236,POI.munster.y/world.h*164,4,0,7);mx.fill();
- mx.fillStyle='#e33';mx.beginPath();mx.arc(p.x/world.w*236,p.y/world.h*164,4,0,7);mx.fill();
-}
-function loop(){update();draw();requestAnimationFrame(loop)}loop();
+// road strips
+cube(0,.01,0,4000,.02,210,.10,.11,.11);cube(0,.02,0,210,.03,3000,.10,.11,.11);
+// Münster complex ahead
+cube(0,0,-560,125,120,100,.62,.56,.43);
+cube(0,0,-620,42,285,42,.67,.62,.49);
+cube(0,285,-620,48,70,48,.72,.67,.54);
+// simple roof/tower
+cube(0,355,-620,12,25,12,.28,.25,.20);
+for(let i=-2;i<=2;i++)cube(i*23,0,-535,12,42,10,.55,.50,.40);
+// street lamps
+for(let z=-700;z<800;z+=120){cube(-95,0,z,4,45,4,.08,.08,.08);cube(95,0,z,4,45,4,.08,.08,.08)}
+// cars
+for(let i=0;i<9;i++){let x=-80+i*20;cube(x,8,-250-i*130,14,9,28,.55,.08+.05*(i%2),.06+.08*(i%3))}
+const vbuf=gl.createBuffer();gl.bindBuffer(gl.ARRAY_BUFFER,vbuf);gl.bufferData(gl.ARRAY_BUFFER,new Float32Array(pos),gl.STATIC_DRAW);
+const cbuf=gl.createBuffer();gl.bindBuffer(gl.ARRAY_BUFFER,cbuf);gl.bufferData(gl.ARRAY_BUFFER,new Float32Array(col),gl.STATIC_DRAW);
+function matMul(a,b){let o=new Float32Array(16);for(let c=0;c<4;c++)for(let r=0;r<4;r++)o[c*4+r]=a[r]*b[c*4]+a[4+r]*b[c*4+1]+a[8+r]*b[c*4+2]+a[12+r]*b[c*4+3];return o}
+function perspective(fov,asp,n,f){let t=1/Math.tan(fov/2),o=new Float32Array(16);o[0]=t/asp;o[5]=t;o[10]=(f+n)/(n-f);o[11]=-1;o[14]=2*f*n/(n-f);return o}
+function view(px,py,pz,yaw,pitch){let cy=Math.cos(yaw),sy=Math.sin(yaw),cp=Math.cos(pitch),sp=Math.sin(pitch);let fx=sy*cp,fy=sp,fz=-cy*cp;let rx=cy,rz=sy;let ux=-sy*sp,uy=cp,uz=cy*sp;return new Float32Array([rx,ux,-fx,0,0,uy,-fy,0,rz,uz,-fz,0,-(rx*px+rz*pz),-(uy*py+ux*px+uz*pz),fx*px+fy*py+fz*pz,1])}
+let px=0,py=35,pz=650,yaw=0,pitch=-.03;const k={f:0,b:0,l:0,r:0};let money=500,wanted=0,step=0;
+document.querySelectorAll('[data-k]').forEach(e=>{e.onpointerdown=ev=>{ev.preventDefault();k[e.dataset.k]=1};e.onpointerup=e.onpointercancel=e.onpointerleave=()=>k[e.dataset.k]=0});
+addEventListener('keydown',e=>{let m={w:'f',ArrowUp:'f',s:'b',ArrowDown:'b',a:'l',ArrowLeft:'l',d:'r',ArrowRight:'r'};if(m[e.key])k[m[e.key]]=1});
+addEventListener('keyup',e=>{let m={w:'f',ArrowUp:'f',s:'b',ArrowDown:'b',a:'l',ArrowLeft:'l',d:'r',ArrowRight:'r'};if(m[e.key])k[m[e.key]]=0});
+// drag look
+let lx=0,ly=0,drag=false;canvas.onpointerdown=e=>{drag=true;lx=e.clientX;ly=e.clientY};canvas.onpointermove=e=>{if(!drag)return;let dx=e.clientX-lx,dy=e.clientY-ly;lx=e.clientX;ly=e.clientY;yaw+=dx*.006;pitch=Math.max(-1.15,Math.min(1.15,pitch-dy*.005))};canvas.onpointerup=canvas.onpointercancel=()=>drag=false;
+document.getElementById('action').onpointerdown=()=>{money+=10;document.getElementById('money').textContent=money;document.getElementById('hint').textContent='💥 Aktion';document.getElementById('hint').style.display='block';setTimeout(()=>document.getElementById('hint').style.display='none',500)};
+function resize(){let d=devicePixelRatio||1;canvas.width=innerWidth*d;canvas.height=innerHeight*d;gl.viewport(0,0,canvas.width,canvas.height)}resize();addEventListener('resize',resize);
+function tick(){
+ let sp=.9;if(k.f) {px+=Math.sin(yaw)*sp;pz-=Math.cos(yaw)*sp}if(k.b){px-=Math.sin(yaw)*sp;pz+=Math.cos(yaw)*sp}
+ if(k.l)yaw-=.035;if(k.r)yaw+=.035;
+ px=Math.max(-1900,Math.min(1900,px));pz=Math.max(-1400,Math.min(1400,pz));
+ if(step===0&&Math.hypot(px,pz-650)<150){step=1;document.getElementById('mission').innerHTML='⛪ <b>ULMER MÜNSTER</b> — Geh zum Münster';}
+ if(step===1&&Math.hypot(px,pz+560)<170){step=2;money+=300;document.getElementById('money').textContent=money;document.getElementById('mission').innerHTML='🌊 <b>DONAU</b> — Freie Fahrt';}
+ gl.enable(gl.DEPTH_TEST);gl.clearColor(.42,.56,.64,1);gl.clear(gl.COLOR_BUFFER_BIT|gl.DEPTH_BUFFER_BIT);
+ gl.bindBuffer(gl.ARRAY_BUFFER,vbuf);gl.enableVertexAttribArray(ap);gl.vertexAttribPointer(ap,3,gl.FLOAT,false,0,0);
+ gl.bindBuffer(gl.ARRAY_BUFFER,cbuf);gl.enableVertexAttribArray(ac);gl.vertexAttribPointer(ac,3,gl.FLOAT,false,0,0);
+ let P=perspective(1.05,innerWidth/innerHeight,.1,4000),V=view(px,py,pz,yaw,pitch);gl.uniformMatrix4fv(um,false,matMul(P,V));gl.drawArrays(gl.TRIANGLES,0,pos.length/3);
+ requestAnimationFrame(tick)
+}tick();
 </script></body></html>
